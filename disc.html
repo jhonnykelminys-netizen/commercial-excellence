@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quiz DISC | Descubra Seu Perfil Vendedor</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --amazon-orange: #FF9900;
+            --amazon-dark: #131921;
+            --amazon-light: #232F3E;
+            --white: #FFFFFF;
+            --disc-d: #E53E3E;
+            --disc-i: #FF9900;
+            --disc-s: #38A169;
+            --disc-c: #3182CE;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--amazon-dark);
+            color: var(--white);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 24px 16px;
+            margin-bottom: 20px;
+        }
+
+        .header .logo {
+            width: 80px;
+            height: 20px;
+            margin: 0 auto 16px;
+            border-bottom: 3px solid var(--amazon-orange);
+            border-radius: 0 0 40px 40px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* Progress */
+        .progress-wrap {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            height: 8px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--amazon-orange), #FFB347);
+            border-radius: 20px;
+            transition: width 0.4s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 8px;
+        }
+
+        /* Screens */
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeUp 0.3s ease;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Name input screen */
+        .name-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .name-screen h2 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+        }
+
+        .name-screen p {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 24px;
+        }
+
+        .input-wrap {
+            margin-bottom: 20px;
+        }
+
+        .input-wrap input {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: 12px;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05);
+            color: var(--white);
+            font-size: 1.1rem;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-wrap input:focus {
+            border-color: var(--amazon-orange);
+        }
+
+        .input-wrap input::placeholder {
+            color: rgba(255,255,255,0.3);
+        }
+
+        .btn-start {
+            background: var(--amazon-orange);
+            color: var(--amazon-dark);
+            border: none;
+            padding: 16px 40px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .btn-start:hover {
+            background: #FFB347;
+            transform: scale(1.02);
+        }
+
+        .btn-start:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Question */
+        .question-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px 20px;
+        }
+
+        .question-number {
+            font-size: 0.8rem;
+            color: var(--amazon-orange);
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        /* Options */
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option:hover {
+            border-color: rgba(255,153,0,0.5);
+            background: rgba(255,153,0,0.05);
+        }
+
+        .option:active {
+            transform: scale(0.98);
+        }
+
+        .option.selected {
+            border-color: var(--amazon-orange);
+            background: rgba(255,153,0,0.1);
+        }
+
+        .option-letter {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .option.selected .option-letter {
+            background: var(--amazon-orange);
+            color: var(--amazon-dark);
+        }
+
+        .option-text {
+            font-size: 0.95rem;
+            line-height: 1.3;
+        }
+
+        /* Result Screen */
+        .result-screen {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .result-badge {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 3rem;
+        }
+
+        .result-badge.d { background: rgba(229,62,62,0.2); border: 3px solid var(--disc-d); }
+        .result-badge.i { background: rgba(255,153,0,0.2); border: 3px solid var(--disc-i); }
+        .result-badge.s { background: rgba(56,161,105,0.2); border: 3px solid var(--disc-s); }
+        .result-badge.c { background: rgba(49,130,206,0.2); border: 3px solid var(--disc-c); }
+
+        .result-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .result-subtitle {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 24px;
+        }
+
+        .result-details {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .result-details h3 {
+            font-size: 1rem;
+            color: var(--amazon-orange);
+            margin-bottom: 12px;
+        }
+
+        .result-details ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .result-details ul li {
+            padding: 6px 0;
+            padding-left: 20px;
+            position: relative;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.85);
+        }
+
+        .result-details ul li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--amazon-orange);
+        }
+
+        .result-chart {
+            display: flex;
+            gap: 8px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+
+        .chart-bar-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .chart-bar-container {
+            width: 40px;
+            height: 80px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            display: flex;
+            align-items: flex-end;
+            overflow: hidden;
+        }
+
+        .chart-bar {
+            width: 100%;
+            border-radius: 8px 8px 0 0;
+            transition: height 0.5s ease;
+        }
+
+        .chart-bar.d { background: var(--disc-d); }
+        .chart-bar.i { background: var(--disc-i); }
+        .chart-bar.s { background: var(--disc-s); }
+        .chart-bar.c { background: var(--disc-c); }
+
+        .chart-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .chart-label.d { color: var(--disc-d); }
+        .chart-label.i { color: var(--disc-i); }
+        .chart-label.s { color: var(--disc-s); }
+        .chart-label.c { color: var(--disc-c); }
+
+        .chart-pct {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* Warning note */
+        .note-box {
+            background: rgba(255,153,0,0.08);
+            border-left: 3px solid var(--amazon-orange);
+            border-radius: 0 8px 8px 0;
+            padding: 12px 16px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .note-box p {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* Saving indicator */
+        .saving {
+            margin-top: 16px;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .saving.success {
+            color: var(--disc-s);
+        }
+
+        .saving.error {
+            color: var(--disc-d);
+        }
+
+        /* Disclaimer at bottom */
+        .disclaimer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 16px;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div class="logo"></div>
+        <h1>Descubra Seu Perfil Vendedor</h1>
+        <p>Metodologia DISC — Comportamento no Trabalho</p>
+    </div>
+
+    <!-- SCREEN: Name Input -->
+    <div class="screen active" id="screen-name">
+        <div class="name-screen">
+            <h2>Antes de comecar...</h2>
+            <p>Digite seu alias Amazon para salvarmos seu resultado</p>
+            <div class="input-wrap">
+                <input type="text" id="userName" placeholder="@seualias" autocomplete="off">
+            </div>
+            <button class="btn-start" id="btnStart" disabled onclick="startQuiz()">Comecar o DISC</button>
+        </div>
+    </div>
+
+    <!-- SCREEN: Questions -->
+    <div class="screen" id="screen-quiz">
+        <div class="progress-text" id="progressText">Pergunta 1 de 20</div>
+        <div class="progress-wrap">
+            <div class="progress-fill" id="progressFill" style="width:10%"></div>
+        </div>
+        <div class="question-card">
+            <div class="question-number" id="qNumber">Pergunta 1</div>
+            <div class="question-text" id="qText"></div>
+            <div class="options" id="qOptions"></div>
+        </div>
+    </div>
+
+    <!-- SCREEN: Result -->
+    <div class="screen" id="screen-result">
+        <div class="result-screen">
+            <div class="result-badge" id="resultBadge">🔴</div>
+            <div class="result-title" id="resultTitle">Perfil D</div>
+            <div class="result-subtitle" id="resultSubtitle">Dominancia</div>
+
+            <div class="result-chart" id="resultChart"></div>
+
+            <div class="result-details" id="resultDetails"></div>
+
+            <div class="note-box">
+                <p>⚠️ <strong>Lembre-se:</strong> Este e seu perfil comportamental <strong>no trabalho</strong>. Na vida pessoal, seu perfil predominante pode ser diferente. Nao existe perfil melhor ou pior — cada um tem seu estilo.</p>
+            </div>
+
+            <div class="saving" id="savingStatus">Salvando resultado...</div>
+            <button onclick="downloadResult()" style="margin-top:20px;background:#FF9900;color:#131921;border:none;padding:16px 32px;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;width:100%;">📥 Salvar Meu Resultado</button>
+        </div>
+    </div>
+
+    <div class="disclaimer">
+        SME Comercial Excelente | BRSellerEvents | @jhonnyap
+    </div>
+</div>
+
+<script>
+// ============ QUESTIONS DATABASE ============
+const questions = [
+    {
+        text: "Em uma reunião com seller, você tende a...",
+        options: [
+            { text: "Ir direto ao ponto e propor ação imediata", profile: "D" },
+            { text: "Criar conexão pessoal antes de falar de negocios", profile: "I" },
+            { text: "Ouvir com calma antes de dar qualquer sugestão", profile: "S" },
+            { text: "Analisar os dados do seller antes de falar", profile: "C" }
+        ]
+    },
+    {
+        text: "Quando precisa convencer um seller a ativar FBA, você...",
+        options: [
+            { text: "Mostra urgência: 'Ative agora antes do Prime Day'", profile: "D" },
+            { text: "Conta história de sucesso de outro seller parecido", profile: "I" },
+            { text: "Constroi confiança aos poucos em varios contatos", profile: "S" },
+            { text: "Apresenta comparativo de conversão com e sem FBA", profile: "C" }
+        ]
+    },
+    {
+        text: "Sob pressão de metas semanais, você...",
+        options: [
+            { text: "Acelera e liga pra todos os sellers possíveis", profile: "D" },
+            { text: "Busca parcerias criativas com sellers estrategicos", profile: "I" },
+            { text: "Mantém calma e segue o plano consistente", profile: "S" },
+            { text: "Revisa dados pra identificar onde focar esforço", profile: "C" }
+        ]
+    },
+    {
+        text: "Um seller irritado te liga reclamando. Você...",
+        options: [
+            { text: "Resolve ali na hora com ação rapida", profile: "D" },
+            { text: "Desarma com simpatia e bom humor", profile: "I" },
+            { text: "Escuta com paciência até ele terminar", profile: "S" },
+            { text: "Investiga a causa raiz do problema primeiro", profile: "C" }
+        ]
+    },
+    {
+        text: "Seu estilo de e-mail para sellers e mais...",
+        options: [
+            { text: "Curto, direto, com chamada pra acao clara", profile: "D" },
+            { text: "Animado, com tom pessoal e proximo", profile: "I" },
+            { text: "Gentil, oferecendo ajuda e disponibilidade", profile: "S" },
+            { text: "Detalhado, com dados e argumentos lógicos", profile: "C" }
+        ]
+    },
+    {
+        text: "Quando precisa negociar uma promoção com um seller, você...",
+        options: [
+            { text: "Pede firme e fecha rapido sem hesitar", profile: "D" },
+            { text: "Faz o seller se sentir especial pela oportunidade do evento", profile: "I" },
+            { text: "Vai devagar, construindo o acordo em varios contatos", profile: "S" },
+            { text: "Justifica com dados por que o desconto gera retorno pro seller", profile: "C" }
+        ]
+    },
+    {
+        text: "Quando um seller diz 'vou pensar', você...",
+        options: [
+            { text: "Cria urgência: 'Essa condição vale ate sexta'", profile: "D" },
+            { text: "Reforça o valor: 'Pensa no impacto que isso traz pro seu negocio'", profile: "I" },
+            { text: "Respeita o tempo dele e agenda follow-up", profile: "S" },
+            { text: "Pergunta o que falta pra tomar a decisão", profile: "C" }
+        ]
+    },
+    {
+        text: "No WhatsApp com 500 sellers, você prefere...",
+        options: [
+            { text: "Mensagem curta e objetiva com acao clara", profile: "D" },
+            { text: "Mensagem engajadora com tom pessoal e storytelling", profile: "I" },
+            { text: "Mensagem personalizada por grupo ou segmento", profile: "S" },
+            { text: "Mensagem com dados e provas de resultado concreto", profile: "C" }
+        ]
+    },
+    {
+        text: "O que mais te motiva como AM e...",
+        options: [
+            { text: "Bater e superar metas toda semana", profile: "D" },
+            { text: "Seller agradecer por ter mudado o negocio dele", profile: "I" },
+            { text: "Construir relacionamento duradouro com sellers", profile: "S" },
+            { text: "Encontrar a estratégia perfeita baseada em dados", profile: "C" }
+        ]
+    },
+    {
+        text: "Num treinamento como este, você...",
+        options: [
+            { text: "Quer ir logo pra prática", profile: "D" },
+            { text: "Curte trocar experiências com o grupo", profile: "I" },
+            { text: "Prefere absorver bem antes de aplicar", profile: "S" },
+            { text: "Quer entender a lógica por trás da tecnica", profile: "C" }
+        ]
+    },
+    {
+        text: "Quando um seller atinge um resultado positivo, você...",
+        options: [
+            { text: "Ja aproveita pra propor o próximo passo", profile: "D" },
+            { text: "Comemora junto e reforça a parceria", profile: "I" },
+            { text: "Reconhece o esforço dele e mantem o ritmo", profile: "S" },
+            { text: "Documenta o resultado pra usar como case", profile: "C" }
+        ]
+    },
+    {
+        text: "Ao planejar sua semana de contatos com sellers, você...",
+        options: [
+            { text: "Prioriza os que fecham rapido e geram impacto imediato", profile: "D" },
+            { text: "Comeca pelos que tem mais afinidade e confiança", profile: "I" },
+            { text: "Segue uma rotina consistente e previsível", profile: "S" },
+            { text: "Organiza por dados: GMS, oportunidade, funil", profile: "C" }
+        ]
+    },
+    {
+        text: "Quando precisa pedir um desconto mais agressivo ao seller, você...",
+        options: [
+            { text: "Vai direto e pede com segurança, sem rodeios", profile: "D" },
+            { text: "Contexualiza com entusiasmo sobre o evento e oportunidade", profile: "I" },
+            { text: "Constroi o pedido aos poucos ao longo de varios contatos", profile: "S" },
+            { text: "Apresenta simulações e cenários que justificam o pedido", profile: "C" }
+        ]
+    },
+    {
+        text: "Seu ponto forte em uma call de engajamento e...",
+        options: [
+            { text: "Objetividade — seller sai da call sabendo exatamente o que fazer", profile: "D" },
+            { text: "Energia — seller sai motivado e empolgado com as possibilidades", profile: "I" },
+            { text: "Confianca — seller se sente seguro e amparado", profile: "S" },
+            { text: "Clareza — seller entende os numeros e toma decisão informada", profile: "C" }
+        ]
+    },
+    {
+        text: "Quando a meta semanal esta dificil de bater, você...",
+        options: [
+            { text: "Dobra a velocidade: mais calls, mais propostas", profile: "D" },
+            { text: "Pede ajuda ao time e busca soluções criativas juntos", profile: "I" },
+            { text: "Mantém a calma e confia no processo que funciona", profile: "S" },
+            { text: "Analisa onde perdeu oportunidade e ajusta a rota", profile: "C" }
+        ]
+    },
+    {
+        text: "Na hora de apresentar FBA a um seller resistente, você...",
+        options: [
+            { text: "Vai com provocação: 'Voce quer brincar ou jogar pra valer?'", profile: "D" },
+            { text: "Conta a historia de um seller parecido que virou o jogo com FBA", profile: "I" },
+            { text: "Mostra que não há risco: sem mínimo, sem compromisso longo", profile: "S" },
+            { text: "Traz comparativo de visibilidade e conversão com e sem FBA", profile: "C" }
+        ]
+    },
+    {
+        text: "Depois de uma negociação bem-sucedida, você...",
+        options: [
+            { text: "Ja pensa na próxima ação e no próximo seller da lista", profile: "D" },
+            { text: "Celebra o momento e fortalece a relação", profile: "I" },
+            { text: "Garante que tudo ficou registrado e alinhado", profile: "S" },
+            { text: "Avalia o que funcionou pra replicar com outros", profile: "C" }
+        ]
+    },
+    {
+        text: "Se um seller compara a Amazon negativamente em relação a outro marketplace, você...",
+        options: [
+            { text: "Rebate com assertividade destacando diferenciais Amazon", profile: "D" },
+            { text: "Pergunta sobre a experiência dele como cliente Prime pra gerar conexão", profile: "I" },
+            { text: "Ouve a comparação inteira antes de responder com calma", profile: "S" },
+            { text: "Traz dados comparativos: comissão, frete, conversão", profile: "C" }
+        ]
+    },
+    {
+        text: "O que define sua identidade como Gerente de Contas (AM) e...",
+        options: [
+            { text: "Resultados — metas batidas falam por si", profile: "D" },
+            { text: "Relacionamentos — sellers me indicam pra outros", profile: "I" },
+            { text: "Consistência — sellers confiam porque sou previsível e presente", profile: "S" },
+            { text: "Estratégia — cada ação minha e baseada em análise", profile: "C" }
+        ]
+    },
+    {
+        text: "Quando o seller te questiona sobre um processo que voce nao domina, você...",
+        options: [
+            { text: "Assume que vai descobrir e retorna com a resposta rapido", profile: "D" },
+            { text: "Transforma em conversa: 'Boa pergunta, vamos resolver juntos'", profile: "I" },
+            { text: "Anota com cuidado e garante que vai retornar no prazo combinado", profile: "S" },
+            { text: "Pesquisa antes de responder pra dar a informacao mais precisa", profile: "C" }
+        ]
+    }
+];
+
+// ============ PROFILE DATA ============
+const profiles = {
+    D: {
+        emoji: "🔴",
+        name: "Perfil D",
+        fullName: "Dominancia",
+        color: "#E53E3E",
+        strengths: [
+            "Fecha negocios rapido",
+            "Assertividade na proposta",
+            "Foco total no resultado",
+            "Nao perde tempo com enrolacao"
+        ],
+        develop: [
+            "Ouvir mais ANTES de propor",
+            "Paciencia com sellers indecisos",
+            "Deixar seller 'sentir que ganhou'",
+            "Construir rapport antes do fechamento"
+        ],
+        phrase: "Qual ativamos primeiro?"
+    },
+    I: {
+        emoji: "🟡",
+        name: "Perfil I",
+        fullName: "Influencia",
+        color: "#FF9900",
+        strengths: [
+            "Rapport instantaneo com sellers",
+            "Entusiasmo contagiante",
+            "Persuasao natural",
+            "Seller se sente especial com voce"
+        ],
+        develop: [
+            "Organizacao no follow-up",
+            "Nao prometer mais que entrega",
+            "Documentar compromissos",
+            "Foco no resultado, nao so conversa"
+        ],
+        phrase: "Voce merece estar no Top 30!"
+    },
+    S: {
+        emoji: "🟢",
+        name: "Perfil S",
+        fullName: "Estabilidade",
+        color: "#38A169",
+        strengths: [
+            "Confianca profunda do seller",
+            "Constancia no follow-up",
+            "Relacionamento de longo prazo",
+            "Seller nunca sai da sua carteira"
+        ],
+        develop: [
+            "Ser mais direto no fechamento",
+            "Lidar com pressão de metas",
+            "Pedir o 'sim' sem culpa",
+            "Agir com urgência quando precisa"
+        ],
+        phrase: "Estou aqui com voce nessa jornada"
+    },
+    C: {
+        emoji: "🔵",
+        name: "Perfil C",
+        fullName: "Conformidade",
+        color: "#3182CE",
+        strengths: [
+            "Argumentacao com dados solidos",
+            "Preparacao impecavel",
+            "Credibilidade tecnica alta",
+            "Seller confia nos seus numeros"
+        ],
+        develop: [
+            "Soltar mais o lado humano",
+            "Nao esperar ter TODOS os dados pra agir",
+            "Criar conexao emocional",
+            "Simplificar a linguagem tecnica"
+        ],
+        phrase: "Os dados mostram 40% mais conversao"
+    }
+};
+
+// ============ STATE ============
+let currentQuestion = 0;
+let answers = { D: 0, I: 0, S: 0, C: 0 };
+let userName = "";
+
+// ============ NAME INPUT ============
+const nameInput = document.getElementById('userName');
+const btnStart = document.getElementById('btnStart');
+
+nameInput.addEventListener('input', () => {
+    btnStart.disabled = nameInput.value.trim().length < 2;
+});
+
+nameInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && nameInput.value.trim().length >= 2) {
+        startQuiz();
+    }
+});
+
+function startQuiz() {
+    userName = nameInput.value.trim();
+    document.getElementById('screen-name').classList.remove('active');
+    document.getElementById('screen-quiz').classList.add('active');
+    showQuestion(0);
+}
+
+// ============ QUIZ LOGIC ============
+function showQuestion(index) {
+    const q = questions[index];
+    document.getElementById('qNumber').textContent = `Pergunta ${index + 1}`;
+    document.getElementById('qText').textContent = q.text;
+    document.getElementById('progressText').textContent = `Pergunta ${index + 1} de ${questions.length}`;
+    document.getElementById('progressFill').style.width = `${((index + 1) / questions.length) * 100}%`;
+
+    const optionsDiv = document.getElementById('qOptions');
+    const letters = ['A', 'B', 'C', 'D'];
+    
+    // Shuffle options
+    const shuffled = [...q.options].sort(() => Math.random() - 0.5);
+    
+    optionsDiv.innerHTML = shuffled.map((opt, i) => `
+        <div class="option" onclick="selectOption(this, '${opt.profile}')">
+            <div class="option-letter">${letters[i]}</div>
+            <div class="option-text">${opt.text}</div>
+        </div>
+    `).join('');
+}
+
+function selectOption(el, profile) {
+    // Visual feedback
+    document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+
+    // Record answer
+    answers[profile]++;
+
+    // Next question after brief delay
+    setTimeout(() => {
+        currentQuestion++;
+        if (currentQuestion < questions.length) {
+            showQuestion(currentQuestion);
+        } else {
+            showResult();
+        }
+    }, 400);
+}
+
+// ============ RESULT ============
+function showResult() {
+    document.getElementById('screen-quiz').classList.remove('active');
+    document.getElementById('screen-result').classList.add('active');
+
+    // Determine dominant profile
+    const sorted = Object.entries(answers).sort((a, b) => b[1] - a[1]);
+    const dominant = sorted[0][0];
+    const profile = profiles[dominant];
+    const total = questions.length;
+
+    // Badge
+    const badge = document.getElementById('resultBadge');
+    badge.textContent = profile.emoji;
+    badge.className = `result-badge ${dominant.toLowerCase()}`;
+
+    // Title
+    document.getElementById('resultTitle').textContent = profile.name;
+    document.getElementById('resultTitle').style.color = profile.color;
+    document.getElementById('resultSubtitle').textContent = profile.fullName;
+
+    // Chart
+    const chartDiv = document.getElementById('resultChart');
+    chartDiv.innerHTML = ['D', 'I', 'S', 'C'].map(p => {
+        const pct = Math.round((answers[p] / total) * 100);
+        return `
+            <div class="chart-bar-wrap">
+                <div class="chart-bar-container">
+                    <div class="chart-bar ${p.toLowerCase()}" style="height:${Math.max(pct, 5)}%"></div>
+                </div>
+                <div class="chart-label ${p.toLowerCase()}">${p}</div>
+                <div class="chart-pct">${pct}%</div>
+            </div>
+        `;
+    }).join('');
+
+    // Details
+    const detailsDiv = document.getElementById('resultDetails');
+    detailsDiv.innerHTML = `
+        <h3>🏆 Seus Superpoderes Comerciais</h3>
+        <ul>${profile.strengths.map(s => `<li>${s}</li>`).join('')}</ul>
+        <h3 style="margin-top:16px;">🎯 Pontos de Desenvolvimento</h3>
+        <ul>${profile.develop.map(d => `<li>${d}</li>`).join('')}</ul>
+        <h3 style="margin-top:16px;">💬 Sua Frase de Poder</h3>
+        <p style="font-size:1.1rem; font-style:italic; color:${profile.color}; margin-top:8px;">"${profile.phrase}"</p>
+    `;
+
+    // Save to Google Sheets
+    saveToSheets(dominant);
+}
+
+// ============ GOOGLE SHEETS INTEGRATION ============
+function saveToSheets(dominant) {
+    const status = document.getElementById('savingStatus');
+    status.textContent = "Salvando resultado...";
+    status.className = "saving";
+
+    const total = questions.length;
+    const data = {
+        name: userName.startsWith('@') ? userName : '@' + userName,
+        profile: dominant,
+        profileName: profiles[dominant].fullName,
+        d_score: answers.D,
+        i_score: answers.I,
+        s_score: answers.S,
+        c_score: answers.C,
+        d_pct: Math.round((answers.D / total) * 100),
+        i_pct: Math.round((answers.I / total) * 100),
+        s_pct: Math.round((answers.S / total) * 100),
+        c_pct: Math.round((answers.C / total) * 100),
+        timestamp: new Date().toISOString()
+    };
+
+    // Google Apps Script Web App URL
+    // Google Apps Script Web App URL
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwMy326CGsheQVXTyUoy2Jl_9c9mbQGxfur8so7uiud3cDSlwIpMes42qIEGBJVWiR7KA/exec";
+
+    // Formatar dados pro Apps Script
+    const payload = {
+        type: 'disc',
+        alias: data.name,
+        profile: dominant,
+        D: answers.D,
+        I: answers.I,
+        S: answers.S,
+        C: answers.C
+    };
+
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(() => {
+        status.textContent = "✅ Resultado salvo!";
+        status.className = "saving success";
+    })
+    .catch((err) => {
+        status.textContent = "⚠️ Resultado pronto (erro ao salvar)";
+        status.className = "saving error";
+        console.error('Erro ao salvar:', err);
+    });
+}
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+function downloadResult() {
+    const resultScreen = document.querySelector('.result-screen');
+    const btn = event.target;
+    const status = document.getElementById('savingStatus');
+    
+    // Esconder elementos que não devem aparecer na imagem
+    btn.style.display = 'none';
+    status.style.display = 'none';
+    
+    html2canvas(resultScreen, {
+        backgroundColor: '#131921',
+        scale: 2,
+        useCORS: true
+    }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'Meu-Perfil-DISC-' + userName.replace('@','') + '.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        btn.style.display = 'block';
+        btn.textContent = '✅ Salvo! Verifique sua galeria';
+        btn.style.background = '#38A169';
+        status.style.display = 'none';
+    }).catch(err => {
+        btn.style.display = 'block';
+        btn.textContent = '❌ Erro. Tente um print da tela.';
+        btn.style.background = '#E53E3E';
+        status.style.display = 'none';
+        console.error(err);
+    });
+}
+</script>
+</body>
+</html>
