@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz — Desperte Sua Veia Comercial | Amazon</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#131921;color:#fff;min-height:100vh;padding:20px}
+.container{max-width:620px;margin:0 auto}
+.header{text-align:center;padding:24px 0 20px;border-bottom:2px solid #FF9900;margin-bottom:24px}
+.header h1{font-size:22px;font-weight:800;color:#fff}
+.header h1 span{color:#FF9900}
+.header p{font-size:12px;color:#94a3b8;margin-top:6px}
+.progress-bar{width:100%;height:6px;background:#232f3e;border-radius:3px;margin-bottom:20px;overflow:hidden}
+.progress-fill{height:100%;background:#FF9900;border-radius:3px;transition:width .3s}
+.question-num{font-size:12px;color:#FF9900;font-weight:700;margin-bottom:8px}
+.question{font-size:16px;font-weight:600;color:#fff;margin-bottom:20px;line-height:1.5}
+.scenario{background:#1E293B;border-left:3px solid #FF9900;padding:12px 16px;margin-bottom:16px;font-size:13px;color:rgba(255,255,255,.8);line-height:1.6;border-radius:0 8px 8px 0}
+.options{display:flex;flex-direction:column;gap:10px}
+.option{background:#1E293B;border:2px solid #334155;border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .2s;font-size:14px;line-height:1.4}
+.option:hover{border-color:#FF9900;background:#232f3e}
+.option.selected{border-color:#FF9900;background:rgba(255,153,0,.1)}
+.option.correct{border-color:#10b981;background:rgba(16,185,129,.1)}
+.option.wrong{border-color:#ef4444;background:rgba(239,68,68,.1)}
+.btn{display:block;width:100%;padding:14px;background:#FF9900;color:#131921;font-size:15px;font-weight:800;border:none;border-radius:10px;cursor:pointer;margin-top:20px;transition:all .15s}
+.btn:hover{background:#FFB347}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.result{text-align:center;padding:40px 20px}
+.result .score{font-size:64px;font-weight:900;color:#FF9900}
+.result .label{font-size:18px;color:#fff;margin-top:8px}
+.result .msg{font-size:14px;color:#94a3b8;margin-top:12px;line-height:1.6}
+.hidden{display:none}
+.feedback{margin-top:12px;padding:12px 14px;border-radius:8px;font-size:13px;line-height:1.5}
+.feedback-correct{background:rgba(16,185,129,.1);border:1px solid #10b981;color:#10b981}
+.feedback-wrong{background:rgba(239,68,68,.1);border:1px solid #ef4444;color:#ef4444}
+.alias-input{width:100%;padding:14px;background:#1E293B;border:2px solid #334155;border-radius:10px;color:#fff;font-size:14px;margin-bottom:12px;text-align:center}
+.alias-input:focus{outline:none;border-color:#FF9900}
+.survey{margin-top:24px;padding:20px;background:#1E293B;border-radius:12px;border:1px solid #334155}
+.survey h3{font-size:14px;color:#FF9900;margin-bottom:12px}
+.survey-q{font-size:13px;color:rgba(255,255,255,.8);margin-bottom:8px}
+.stars{display:flex;gap:6px;margin-bottom:16px}
+.star{font-size:28px;cursor:pointer;opacity:.3;transition:all .15s}
+.star.active{opacity:1}
+.survey-comment{width:100%;padding:10px;background:#131921;border:1px solid #334155;border-radius:8px;color:#fff;font-size:12px;resize:vertical;min-height:60px}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+  <h1>Quiz — <span>Negociador Profissional</span></h1>
+  <p>Desperte Sua Veia Comercial | 20 perguntas</p>
+</div>
+
+<!-- ALIAS -->
+<div id="alias-area">
+  <p style="text-align:center;font-size:14px;margin-bottom:12px;color:rgba(255,255,255,.7)">Digite seu alias Amazon para iniciar:</p>
+  <input class="alias-input" id="aliasInput" placeholder="@seualias" maxlength="30">
+  <button class="btn" onclick="startQuiz()">Iniciar Quiz →</button>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz-area" class="hidden">
+  <div class="progress-bar"><div class="progress-fill" id="pbar"></div></div>
+  <div class="question-num" id="qnum"></div>
+  <div id="scenario-box" class="scenario hidden"></div>
+  <div class="question" id="qtxt"></div>
+  <div class="options" id="opts"></div>
+  <div class="feedback hidden" id="feedback"></div>
+  <button class="btn" id="nextBtn" onclick="nextQuestion()" disabled>Próxima →</button>
+</div>
+
+<!-- RESULTADO -->
+<div id="result-area" class="result hidden">
+  <div class="score" id="scoreVal"></div>
+  <div class="label" id="scoreLabel"></div>
+  <div class="msg" id="scoreMsg"></div>
+  <p style="margin-top:20px;font-size:13px;color:#94a3b8">Resultado registrado. Obrigado!</p>
+</div>
+</div>
+
+<script>
+const questions = [
+  {scenario:"Um seller que vende muito no Mercado Livre te diz: 'Lá eu vendo 10x mais, aqui na Amazon não funciona pra mim.'", q:"Qual a melhor abordagem?", opts:["Concordar que o ML é melhor pra ele","Perguntar se ele é assinante Prime e qual foi sua experiência como cliente Amazon","Dizer que o ML vai acabar","Enviar um PDF com dados de mercado"], correct:1, fb:"Criar conexão pessoal com a experiência Prime mostra o valor que ele oferecerá ao cliente final. A pergunta gera reflexão."},
+  {scenario:"Você está negociando uma promoção. O seller precisa chegar em R$80 (VRP). Você pediu R$65 e ele disse: 'R$65 não dá, o mínimo que consigo é R$73.'", q:"O que você faz?", opts:["Insiste em R$65","Aceita R$73 — está abaixo do VRP de R$80 e a promoção será ativada","Diz que não vai funcionar e desiste","Pede pra ele pensar e retorna semana que vem"], correct:1, fb:"R$73 está abaixo do VRP (R$80). Promoção ativa, seller sentiu que negociou, objetivo atingido."},
+  {scenario:"", q:"Verdadeiro ou Falso: Na Amazon, o seller precisa ter vendido um volume mínimo antes de ser elegível ao FBA.", opts:["Verdadeiro","Falso"], correct:1, fb:"Falso. A Amazon não exige volume mínimo para FBA. Isso mostra confiança no serviço e democratiza o acesso."},
+  {scenario:"Um seller reclama: 'Vocês só mandam e-mail, nunca tenho um atendimento real.'", q:"Qual atitude demonstra habilidade comercial?", opts:["Explicar que o processo é por e-mail mesmo","Reconhecer, pedir desculpas e propor um cronograma de acompanhamento com próximos passos claros","Transferir pra outro time","Dizer que ele precisa ler os e-mails melhor"], correct:1, fb:"Reconhecer e propor um plano concreto mostra Customer Obsession e cria compromisso mútuo."},
+  {scenario:"", q:"Verdadeiro ou Falso: Em outros marketplaces, sellers sem no mínimo R$500 mil/mês de vendas geralmente não têm acesso a um gerente de contas gratuito.", opts:["Verdadeiro","Falso"], correct:0, fb:"Verdadeiro. A Amazon oferece gerente de contas gratuitamente desde os primeiros passos — diferencial competitivo relevante."},
+  {scenario:"Seller diz: 'Não vou abrir mão de margem pra fazer promoção. Não faz sentido vender mais barato.'", q:"Melhor abordagem:", opts:["Aceitar e não insistir","Falar que todos os sellers fazem promoção","Reconhecer a preocupação com margem e mostrar que o efeito dominó (visibilidade + avaliações + catálogo) compensa no médio prazo","Dizer que sem promoção ele não vai vender nada"], correct:2, fb:"Promoção em evento é vitrine: visibilidade gera avaliações, tráfego no catálogo e vendas em outros produtos com margem cheia."},
+  {scenario:"Você ligou pro seller e ele disse que está ocupado e pede pra ligar na semana que vem.", q:"O que um AM com perfil comercial faz?", opts:["Liga semana que vem e repete o mesmo pitch","Envia um resumo curto por e-mail com 3 pontos concretos e agenda um horário específico","Desiste desse seller","Insiste na ligação agora"], correct:1, fb:"Deixar algo concreto + agenda específica mostra respeito ao tempo do seller e mantém o momentum."},
+  {scenario:"", q:"'O boi só engorda aos olhos do dono.' No contexto comercial Amazon, isso significa:", opts:["O AM deve fazer tudo pelo seller","O seller é o principal responsável pelo próprio negócio — o AM é facilitador","O AM não precisa se envolver","O seller não precisa de ajuda"], correct:1, fb:"O AM indica caminhos e facilita, mas a energia e o empenho principal precisam vir do seller."},
+  {scenario:"Um seller tem um produto a R$100. A política VRP (Validação de Preço de Referência) exige R$80 pra ativar a promoção. Você vai ligar pra negociar.", q:"Qual valor você pede ao seller?", opts:["R$80 — exatamente o que o VRP exige","R$65 — cria margem pra o seller negociar e ainda fechar no alvo","R$75 — um pouco abaixo apenas","Não menciona valor, pergunta quanto ele toparia"], correct:1, fb:"Pedir abaixo do necessário (R$65) dá espaço pro seller negociar pra cima e ainda fechar dentro ou abaixo do VRP (R$80)."},
+  {scenario:"Seller pergunta: 'Por que eu deveria ativar FBA se já vendo sem isso?'", q:"Melhor resposta:", opts:["'FBA é recomendado mas não obrigatório — depende do seu objetivo'","'Você quer brincar de vender ou quer entrar no jogo de verdade? O selo Prime aumenta sua visibilidade porque clientes filtram por Prime'","'Sem FBA você vai vender menos com certeza'","'É uma sugestão, pode ignorar'"], correct:1, fb:"Provocação respeitosa + fato concreto (filtro Prime) mostra benefício real sem pressionar."},
+  {scenario:"Numa call, o seller te interrompe: 'Já sei, vocês querem que eu faça promoção, todo mundo pede isso.'", q:"Como você reage?", opts:["Fica em silêncio constrangido","Pergunta: 'Antes de falar de promoção — como estão suas vendas esse mês comparado ao anterior? O que está te incomodando?'","Confirma: 'É, preciso que faça promoção'","Muda de assunto e fala de FBA"], correct:1, fb:"Responder com pergunta cria diálogo, mostra interesse genuíno e revela a dor real do seller."},
+  {scenario:"", q:"Verdadeiro ou Falso: Customer Obsession (Obsessão pelo Cliente) no contexto SSR-M significa fazer tudo que o seller pede.", opts:["Verdadeiro","Falso"], correct:1, fb:"Falso. Customer Obsession (Obsessão pelo Cliente) é garantir clareza e gerar valor real — não é ser submisso. É orientar com honestidade."},
+  {scenario:"Seller diz: 'Meu concorrente tá vendendo o triplo que eu.'", q:"Melhor abordagem comercial:", opts:["Falar mal do concorrente","Perguntar se ele já fez alguma promoção ou está em FBA (Logística Amazon), e propor: Ads (Anúncios Patrocinados), FBA e Deals (Promoções) ajudam a fechar esse gap. Qual ativamos primeiro?","Dizer que não tem como competir","Ignorar e falar de outro assunto"], correct:1, fb:"Perguntar antes e propor programas concretos transforma a dor da competição em oportunidade de ação."},
+  {scenario:"Você fechou uma negociação com um seller e ele aceitou fazer a promoção. Qual o próximo passo?", q:"", opts:["Encerrar a call e seguir pro próximo seller","Agradecer, alinhar cronograma, definir quem faz o quê e quando, e confirmar próximo contato","Mandar um e-mail padrão","Avisar o time no Slack"], correct:1, fb:"Cronograma + divisão de responsabilidade + próximo contato = contato rico que gera confiança."},
+  {scenario:"", q:"Verdadeiro ou Falso: Eventos como Prime Day são apenas sobre desconto — não impactam o crescimento de longo prazo da loja.", opts:["Verdadeiro","Falso"], correct:1, fb:"Falso. Eventos são vitrines que geram avaliações, tráfego no catálogo e efeito dominó para vendas futuras com margem cheia."},
+  {scenario:"Seller diz: 'Tentei Amazon ano passado e não vendeu nada. Voltei pro ML.'", q:"Qual abordagem gera conexão?", opts:["'Dessa vez vai ser diferente, confia'","'O que exatamente aconteceu? Me conta o que tentou e onde travou — quero entender pra te ajudar a corrigir a rota'","'O ML realmente é melhor pra alguns'","'Vou te colocar num programa especial'"], correct:1, fb:"Perguntar antes de propor. Entender o histórico mostra respeito e permite propor solução personalizada."},
+  {scenario:"Você precisa engajar um seller em Ads (Anúncios Patrocinados) mas ele nunca usou. Na call ele diz: 'Não entendo nada de anúncio, não é pra mim.'", q:"O que você faz?", opts:["Aceita e não fala mais de Ads","Simplifica: explica que Ads na Amazon funciona diferente — pode começar com investimento baixo no produto que já vende bem e acompanhar o resultado","Envia um PDF sobre Ads","Transfere pra equipe de Ads"], correct:1, fb:"Simplificar e remover o medo com linguagem acessível gera confiança pra testar."},
+  {scenario:"", q:"Completar: 'Errar faz parte, mas _________ é o que diferencia quem está comprometido.'", opts:["ter dinheiro","corrigir a rota rapidamente","nunca errar de novo","ter mais produtos"], correct:1, fb:"Corrigir a rota rápido mostra comprometimento real com resultados."},
+  {scenario:"Seller resiste: 'Não quero fazer promoção de R$20 de desconto. É muito.'", q:"Sabendo que seu alvo real é R$12 de desconto, o que faz?", opts:["Aceita que ele não quer","Diz: 'Entendo. E se chegarmos a um valor que funcione pra você — quanto você toparia pra testar nesse evento?'","Insiste nos R$20","Desiste e vai pro próximo seller"], correct:1, fb:"Devolver com pergunta aberta dá espaço pro seller propor um valor — ele sente controle e você fecha no alvo."},
+  {scenario:"", q:"Verdadeiro ou Falso: Responder uma objeção do seller com outra pergunta é sinal de insegurança.", opts:["Verdadeiro","Falso"], correct:1, fb:"Falso. Perguntar antes de responder demonstra interesse genuíno e permite oferecer uma solução personalizada — é a base da abordagem comercial."}
+];
+
+let current = 0, score = 0, answered = false, userAlias = '';
+let survey = {s1:0, s2:0, s3:0};
+
+function startQuiz(){
+  userAlias = document.getElementById('aliasInput').value.trim();
+  if(!userAlias){alert('Digite seu alias para começar.');return}
+  if(!userAlias.startsWith('@')) userAlias = '@' + userAlias;
+  document.getElementById('alias-area').classList.add('hidden');
+  document.getElementById('quiz-area').classList.remove('hidden');
+  render();
+}
+
+function render(){
+  const q = questions[current];
+  document.getElementById('pbar').style.width = ((current+1)/questions.length*100)+'%';
+  document.getElementById('qnum').textContent = 'Pergunta ' + (current+1) + ' de ' + questions.length;
+  
+  const scenBox = document.getElementById('scenario-box');
+  if(q.scenario){
+    scenBox.textContent = q.scenario;
+    scenBox.classList.remove('hidden');
+  } else {
+    scenBox.classList.add('hidden');
+  }
+  
+  document.getElementById('qtxt').textContent = q.q;
+  const optsDiv = document.getElementById('opts');
+  optsDiv.innerHTML = '';
+  q.opts.forEach((o,i) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.textContent = o;
+    div.onclick = () => selectOption(i);
+    optsDiv.appendChild(div);
+  });
+  document.getElementById('feedback').className = 'feedback hidden';
+  document.getElementById('nextBtn').disabled = true;
+  document.getElementById('nextBtn').textContent = current === questions.length-1 ? 'Ver Resultado' : 'Próxima →';
+  answered = false;
+}
+
+function selectOption(i){
+  if(answered) return;
+  answered = true;
+  const opts = document.querySelectorAll('.option');
+  const correct = questions[current].correct;
+  if(i === correct){
+    opts[i].classList.add('correct');
+    score++;
+    document.getElementById('feedback').className = 'feedback feedback-correct';
+    document.getElementById('feedback').textContent = '✅ ' + questions[current].fb;
+  } else {
+    opts[i].classList.add('wrong');
+    opts[correct].classList.add('correct');
+    document.getElementById('feedback').className = 'feedback feedback-wrong';
+    document.getElementById('feedback').textContent = '❌ Resposta correta: ' + questions[current].opts[correct] + '. ' + questions[current].fb;
+  }
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextQuestion(){
+  current++;
+  if(current >= questions.length){showResult();return}
+  render();
+}
+
+function showResult(){
+  document.getElementById('quiz-area').classList.add('hidden');
+  document.getElementById('result-area').classList.remove('hidden');
+  const pct = Math.round(score/questions.length*100);
+  document.getElementById('scoreVal').textContent = pct + '%';
+  document.getElementById('scoreLabel').textContent = score + ' de ' + questions.length + ' corretas';
+  let msg = '';
+  if(pct >= 90) msg = 'Parabéns! Você demonstrou domínio das técnicas comerciais.';
+  else if(pct >= 70) msg = 'Bom resultado! Revise os cenários que errou para consolidar.';
+  else msg = 'Recomendamos revisitar o material e praticar os cenários.';
+  document.getElementById('scoreMsg').textContent = msg;
+  
+  // Enviar resultado
+  const url = 'https://script.google.com/macros/s/AKfycbwMy326CGsheQVXTyUoy2Jl_9c9mbQGxfur8so7uiud3cDSlwIpMes42qIEGBJVWiR7KA/exec';
+  const data = {alias: userAlias, score: pct, acertos: score, total: questions.length, quiz: 'Comercial Excelente', data: new Date().toISOString()};
+  fetch(url, {method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)}).catch(()=>{});
+}
+</script>
+</body>
+</html>
